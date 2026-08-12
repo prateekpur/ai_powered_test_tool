@@ -1,0 +1,10 @@
+You are a senior QA engineer.
+
+Analyze the following software requirement.
+
+Identify:
+- Actor
+- Feature
+- Inputs
+- Outputs
+- Risks

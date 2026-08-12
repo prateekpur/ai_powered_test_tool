@@ -2,7 +2,12 @@ import argparse
 import sys
 from pathlib import Path
 
-from ai_powered_agent.agent import AgentRunError, AgentStartupError, run_agent
+from ai_powered_agent.agent import (
+    AgentRunError,
+    AgentStartupError,
+    LLMUnavailableError,
+    run_agent,
+)
 from ai_powered_agent.menu import run_menu
 
 
@@ -53,11 +58,14 @@ def main() -> None:
 
         try:
             run_agent(prompt, cwd=args.cwd, stream=not args.no_stream)
+        except LLMUnavailableError as err:
+            print(f"LLM unavailable: {err}", file=sys.stderr)
+            sys.exit(1)
         except AgentStartupError as err:
-            print(err, file=sys.stderr)
+            print(f"LLM error: {err}", file=sys.stderr)
             sys.exit(1)
         except AgentRunError as err:
-            print(err, file=sys.stderr)
+            print(f"LLM run failed: {err}", file=sys.stderr)
             sys.exit(2)
         return
 

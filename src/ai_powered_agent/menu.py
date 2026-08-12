@@ -1,7 +1,12 @@
 from pathlib import Path
 from typing import Any
 
-from ai_powered_agent.agent import AgentRunError, AgentStartupError, run_agent
+from ai_powered_agent.agent import (
+    AgentRunError,
+    AgentStartupError,
+    LLMUnavailableError,
+    run_agent,
+)
 from ai_powered_agent.models import Requirement, RequirementAnalysis, RequirementPriority
 from ai_powered_agent import prompts
 from ai_powered_agent.session import Session
@@ -98,10 +103,14 @@ def _require_scenarios(session: Session) -> bool:
 def _run_action(cwd: Path, prompt: str) -> str | None:
     try:
         return run_agent(prompt, cwd=cwd)
+    except LLMUnavailableError as err:
+        print(f"\nLLM unavailable: {err}")
+        if err.retryable:
+            print("This may be temporary. You can try again shortly.")
     except AgentStartupError as err:
-        print(f"\nError: {err}")
+        print(f"\nLLM error: {err}")
     except AgentRunError as err:
-        print(f"\nError: {err}")
+        print(f"\nLLM run failed: {err}")
     _pause()
     return None
 
