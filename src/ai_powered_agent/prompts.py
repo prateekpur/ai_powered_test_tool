@@ -58,3 +58,28 @@ def validate_coverage_traceability(
     if security_tests.strip():
         sections.append(f"## Security Tests\n\n{security_tests.strip()}")
     return "\n\n".join(sections)
+
+
+def remediate_coverage_gaps(
+    requirement: Requirement,
+    analysis: RequirementAnalysis,
+    scenarios: str,
+    test_cases: str,
+    coverage_gaps: str,
+    negative_tests: str = "",
+    security_tests: str = "",
+) -> str:
+    template = _load_prompt_template("remediate_gaps_prompt.txt")
+    sections = [
+        f"{template}\n",
+        f"## Requirement\n\n{requirement.to_markdown()}",
+        f"## Analysis\n\n{analysis.to_markdown()}",
+        f"## Existing Test Scenarios\n\n{scenarios.strip()}",
+        f"## Existing Test Cases\n\n{test_cases.strip()}",
+        f"## Coverage/Traceability Validation\n\n{coverage_gaps.strip()}",
+    ]
+    if negative_tests.strip():
+        sections.append(f"## Existing Negative Tests\n\n{negative_tests.strip()}")
+    if security_tests.strip():
+        sections.append(f"## Existing Security Tests\n\n{security_tests.strip()}")
+    return "\n\n".join(sections)

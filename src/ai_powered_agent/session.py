@@ -1,4 +1,5 @@
 import json
+import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,6 +23,64 @@ class Session:
     negative_tests: str = ""
     security_tests: str = ""
     coverage_traceability: str = ""
+    remediation_log: str = ""
+
+    def append_scenarios(self, text: str) -> None:
+        text = text.strip()
+        if not text:
+            return
+        separator = "\n\n---\n\n## Remediation additions (scenarios)\n\n"
+        if self.test_scenarios.strip():
+            self.test_scenarios = self.test_scenarios.rstrip() + separator + text
+        else:
+            self.test_scenarios = text
+
+    def append_test_cases(self, text: str) -> None:
+        text = text.strip()
+        if not text:
+            return
+        separator = "\n\n---\n\n## Remediation additions (test cases)\n\n"
+        if self.test_cases.strip():
+            self.test_cases = self.test_cases.rstrip() + separator + text
+        else:
+            self.test_cases = text
+
+    @staticmethod
+    def _extract_markdown_section(text: str, section_title: str) -> str:
+        pattern = rf"^## {re.escape(section_title)}\s*$"
+        match = re.search(pattern, text, flags=re.MULTILINE | re.IGNORECASE)
+        if not match:
+            return ""
+        start = match.end()
+        next_section = re.search(r"^## ", text[start:], flags=re.MULTILINE)
+        end = start + next_section.start() if next_section else len(text)
+        return text[start:end].strip()
+
+    def apply_remediation(self, response: str) -> tuple[bool, bool]:
+        """Parse remediation LLM output and append new scenarios/test cases."""
+        new_scenarios = self._extract_markdown_section(response, "New Scenarios")
+        new_test_cases = self._extract_markdown_section(response, "New Test Cases")
+        clarifications = self._extract_markdown_section(response, "Requirement clarifications needed")
+        summary = self._extract_markdown_section(response, "Remediation summary")
+
+        if new_scenarios:
+            self.append_scenarios(new_scenarios)
+        if new_test_cases:
+            self.append_test_cases(new_test_cases)
+
+        log_parts: list[str] = []
+        if summary:
+            log_parts.append(f"## Remediation summary\n\n{summary}")
+        if clarifications:
+            log_parts.append(f"## Requirement clarifications needed\n\n{clarifications}")
+        if log_parts:
+            entry = "\n\n".join(log_parts)
+            if self.remediation_log.strip():
+                self.remediation_log = self.remediation_log.rstrip() + "\n\n---\n\n" + entry
+            else:
+                self.remediation_log = entry
+
+        return bool(new_scenarios), bool(new_test_cases)
 
     def has_content(self) -> bool:
         return any(
@@ -33,6 +92,7 @@ class Session:
                 self.negative_tests.strip(),
                 self.security_tests.strip(),
                 self.coverage_traceability.strip(),
+                self.remediation_log.strip(),
             )
         )
 
@@ -69,6 +129,10 @@ class Session:
                     "Coverage/Traceability Validation",
                     self.coverage_traceability.strip(),
                 )
+            )
+        if self.remediation_log.strip():
+            sections.append(
+                ("remediation_log", "Remediation Log", self.remediation_log.strip())
             )
         return sections
 

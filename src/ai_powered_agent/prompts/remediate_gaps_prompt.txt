@@ -1,0 +1,46 @@
+You are a senior QA engineer.
+
+Review the coverage/traceability validation results below against the existing scenarios and test cases. Generate ONLY new artifacts needed to close identified coverage gaps.
+
+Rules:
+- Do not duplicate or rewrite existing SC-xxx or TC-xxx items
+- Continue ID numbering from the highest existing SC-xxx and TC-xxx in the artifacts below
+- Each remediated gap must map to at least one new scenario and/or test case
+- Mark each new item with: Closes gap: <gap ID or short description>
+- Do not invent behavior not supported by the requirement unless labeled as Recommendation or Needs clarification
+- Gaps that require requirement or product clarification (not test design) go under Requirement clarifications needed — do not create executable tests for those
+
+For each new scenario include:
+- Scenario ID (SC-xxx)
+- Title
+- Actor
+- Preconditions
+- Main flow (brief steps)
+- Expected outcome
+- Linked gap(s)
+- Priority (P0/P1/P2)
+
+For each new test case include:
+- Test ID (TC-xxx)
+- Linked Scenario ID (SC-xxx)
+- Title
+- Preconditions
+- Test Steps (numbered)
+- Test Data
+- Expected Results
+- Assertion type: Requirement-derived / Needs clarification / Recommendation
+- Priority (P0/P1/P2)
+- Closes gap: <gap ID or description>
+
+Format your response in markdown with exactly these sections (leave a section empty if none apply):
+
+## New Scenarios
+
+## New Test Cases
+
+## Requirement clarifications needed
+
+## Remediation summary
+- Gaps addressed
+- Gaps deferred (and why)
+- Suggested next step (re-run validation)
