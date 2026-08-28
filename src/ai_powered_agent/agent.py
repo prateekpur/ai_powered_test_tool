@@ -18,14 +18,48 @@ class LLMUnavailableError(AgentStartupError):
     """LLM is not reachable or not configured."""
 
 
+def _env_file_paths() -> list[Path]:
+    project_root = Path(__file__).resolve().parents[2]
+    paths: list[Path] = []
+    for path in (project_root / ".env", Path.cwd() / ".env"):
+        if path.is_file() and path not in paths:
+            paths.append(path)
+    return paths
+
+
+def load_env_file() -> None:
+    """Load environment variables from a .env file if present."""
+    for path in _env_file_paths():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#") or "=" not in stripped:
+                continue
+            key, _, value = stripped.partition("=")
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if not key:
+                continue
+            # Prefer non-empty values from .env over empty shell exports.
+            if value or key not in os.environ:
+                os.environ[key] = value
+
+
 def require_api_key() -> str:
+    load_env_file()
     api_key = os.environ.get("CURSOR_API_KEY", "").strip()
-    if not api_key:
+    if api_key:
+        return api_key
+
+    env_path = next(iter(_env_file_paths()), None)
+    if env_path is not None and "CURSOR_API_KEY=" in env_path.read_text(encoding="utf-8"):
         raise LLMUnavailableError(
-            "LLM is not configured: CURSOR_API_KEY is not set.\n"
-            "Export your key from https://cursor.com/dashboard/integrations"
+            "LLM is not configured: CURSOR_API_KEY is empty in .env.\n"
+            "Paste your key, save the file, and try again."
         )
-    return api_key
+    raise LLMUnavailableError(
+        "LLM is not configured: CURSOR_API_KEY is not set.\n"
+        "Add it to .env or export it from https://cursor.com/dashboard/integrations"
+    )
 
 
 def check_llm_available() -> None:

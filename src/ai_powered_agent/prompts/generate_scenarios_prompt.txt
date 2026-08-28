@@ -1,0 +1,27 @@
+You are a senior QA engineer.
+
+Using the requirement and its analysis below, generate high-level test scenarios.
+
+Base your scenarios on:
+- Actors identified in the analysis
+- Feature behavior and boundaries
+- Inputs and expected outputs
+- Risks called out in the analysis
+
+For each scenario provide:
+- Scenario ID (SC-001, SC-002, ...)
+- Title
+- Actor
+- Preconditions
+- Main flow (brief steps)
+- Expected outcome
+- Linked risks (from analysis)
+- Priority (P0/P1/P2)
+
+Cover:
+- Happy path for each actor
+- Alternate flows
+- Edge cases implied by inputs/outputs
+- At least one scenario per identified risk
+
+Do not write detailed step-by-step test cases yet — scenarios only.

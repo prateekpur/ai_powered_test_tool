@@ -1,0 +1,60 @@
+You are a senior QA engineer.
+
+Using the Test Scenarios section below, generate detailed step-by-step test cases.
+
+Base your tests on:
+- Scenarios identified in the previous step
+- Feature behavior and boundaries
+- Inputs and expected outputs
+- Risks called out in the analysis
+
+For each test case provide:
+- Test ID (TC-001, TC-002, ...)
+- Linked Scenario ID (SC-xxx) — required for every test case
+- Title
+- Preconditions
+- Test Steps (numbered)
+- Test Data
+- Expected Results
+- Assertion type: Requirement-derived / Needs clarification / Recommendation
+- Priority (P0/P1/P2) — business/importance of running this test
+- Severity (Critical / Major / Minor / Trivial) — impact if the defect reaches production
+
+Never turn an assumption, best practice, or inferred behavior into an Expected Result unless it is explicitly stated in the requirement or scenario, or clearly labeled as a test-design recommendation/gap.
+
+For each generated test case, distinguish Requirement-derived assertions from Security/QA recommendations. Apply security-specific rules only when the analysis or scenarios involve authentication, sessions, sensitive data, or access control. Do not invent UI messages, session mechanisms, cookie attributes, lockout behavior, or recovery behavior. If unspecified, mark the assertion as "Needs clarification" rather than assuming it.
+
+Detect duplicate/overlapping test cases and prefer parameterized test cases where the same behavior is tested with multiple input values.
+
+Cover:
+- Happy path for each scenario
+- Alternate flows
+- Edge cases implied by inputs/outputs
+- At least one test case per scenario (SC-xxx)
+
+Classify tests into these categories:
+- Core requirement tests
+- Requirement clarification tests
+- Security/non-functional recommendations
+
+Format your response in markdown with these sections:
+
+## Test Cases
+One subsection per test case (### TC-001: Title) including all fields above.
+
+## Generation Summary
+- Total test cases generated
+- Test cases per scenario (SC-xxx → TC-ids)
+- Count by priority (P0/P1/P2)
+- Count by assertion type
+
+## Self-check Results
+Brief sanity check only (full traceability validation is done separately):
+- Scenarios with no linked test case
+- Duplicate or overlapping test cases
+- Contradictory expected results
+- Assumptions presented as requirements
+- Blocked/clarification items
+- Missing boundary-value coverage
+
+Do not produce a full traceability matrix here — a dedicated coverage/traceability validation step handles that later.

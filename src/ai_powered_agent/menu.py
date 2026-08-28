@@ -17,6 +17,7 @@ MENU_OPTIONS = [
     "Generate Test Cases",
     "Generate Negative Tests",
     "Generate Security Tests",
+    "Coverage/Traceability Validator",
     "Export Report",
     "Exit",
 ]
@@ -96,6 +97,16 @@ def _require_scenarios(session: Session) -> bool:
     if session.test_scenarios.strip():
         return True
     print("Generate test scenarios first (option 2).")
+    _pause()
+    return False
+
+
+def _require_test_cases(session: Session) -> bool:
+    if not _require_scenarios(session):
+        return False
+    if session.test_cases.strip():
+        return True
+    print("Generate test cases first (option 3).")
     _pause()
     return False
 
@@ -223,14 +234,42 @@ def _generate_security_tests(session: Session, cwd: Path) -> None:
         _pause()
 
 
+def _validate_coverage_traceability(session: Session, cwd: Path) -> None:
+    if not _require_test_cases(session):
+        return
+
+    prompt = _build_prompt(
+        "validate_coverage_traceability",
+        requirement=session.requirement,
+        analysis=session.analysis,
+        scenarios=session.test_scenarios,
+        test_cases=session.test_cases,
+        negative_tests=session.negative_tests,
+        security_tests=session.security_tests,
+    )
+    if prompt is None:
+        return
+
+    result = _run_action(cwd, prompt)
+    if result is not None:
+        session.coverage_traceability = result
+        print("\nCoverage/traceability validation saved to session.")
+        _pause()
+
+
 def _export_report(session: Session, output_dir: Path) -> None:
     if not session.has_content():
         print("Nothing to export yet. Run at least one menu action first.")
         _pause()
         return
 
-    path = session.export(output_dir)
-    print(f"\nReport exported to: {path}")
+    result = session.export(output_dir)
+    print(f"\nReport exported to: {result.export_dir}")
+    print(f"Combined report: {result.combined_report.name}")
+    if result.artifact_files:
+        print("\nArtifact files:")
+        for path in sorted(result.artifact_files, key=lambda p: p.name):
+            print(f"  - {path.name}")
     _pause()
 
 
@@ -248,8 +287,9 @@ def run_menu(cwd: Path, output_dir: Path) -> None:
         3: lambda: _generate_test_cases(session, cwd),
         4: lambda: _generate_negative_tests(session, cwd),
         5: lambda: _generate_security_tests(session, cwd),
-        6: lambda: _export_report(session, output_dir),
-        7: None,
+        6: lambda: _validate_coverage_traceability(session, cwd),
+        7: lambda: _export_report(session, output_dir),
+        8: None,
     }
 
     while True:
@@ -257,18 +297,18 @@ def run_menu(cwd: Path, output_dir: Path) -> None:
         choice = input("\nSelect an option: ").strip()
 
         if not choice.isdigit():
-            print("Enter a number from 1 to 7.")
+            print("Enter a number from 1 to 8.")
             _pause()
             continue
 
         option = int(choice)
-        if option == 7:
+        if option == 8:
             print("Goodbye.")
             return
 
         handler = handlers.get(option)
         if handler is None:
-            print("Invalid option. Choose 1-7.")
+            print("Invalid option. Choose 1-8.")
             _pause()
             continue
 
