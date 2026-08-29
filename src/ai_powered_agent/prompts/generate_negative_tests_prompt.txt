@@ -1,0 +1,139 @@
+You are a senior QA engineer.
+
+Using the requirement, analysis, and existing tests below, generate negative test cases.
+
+Focus on:
+- Invalid, missing, or malformed inputs
+- Boundary violations (below min, above max, empty, null, wrong type/format)
+- Unauthorized or wrong-actor actions
+- Invalid state transitions and out-of-order steps
+- Failure handling, error responses, and recovery behavior
+- Risks identified in the analysis that are not covered by happy-path tests
+
+### Allowed Category values (use only these)
+| Category | Use when |
+|----------|----------|
+| **Negative** | Invalid input, rejected operations, error paths, invalid state / out-of-order steps |
+| **Boundary** | Limit/threshold, empty/null, off-by-one, whitespace-only, padded input |
+| **Security** | Auth failures, injection, unauthorized access, XSS |
+| **Validation** | Format/input rule violations, clarification-heavy error UX |
+| **Functional** | Negative path that verifies core feature behavior under bad input |
+| **Performance** | Timing/rate/abuse only when requirement establishes scope |
+
+Do **not** use: `Invalid input`, `State error`, `Authorization`, `Error handling`, `Other`, or meta-labels like `Core requirement tests`.
+
+### Classification rules
+- Boundary/limit tests → **Boundary** (not generic Negative)
+- Invalid state / out-of-order → **Negative** or **Validation**
+- Auth/unauthorized → **Security**
+- Failure handling / degraded UX → **Negative** or **Validation**
+- If already covered in Existing Test Cases, skip or add a genuinely new angle only
+
+### Requirement grounding and classification
+- **Primary classification** (one per test — drives summary counts):
+  - **Requirement-derived** — core pass/fail criteria explicitly supported by requirement or analysis
+  - **Needs clarification** — blocked or outcome undefined until spec is confirmed
+  - **Recommendation** — best practice / security / UX suggestion not stated in requirement
+- Pick the **single dominant** classification for each test. When mixed, choose by what blocks execution or defines the main verdict.
+- **Assertion tags** — list every label that applies (including the primary). Tags can overlap across tests; tag counts are **not** mutually exclusive.
+
+Do not use a combined field like `Assertion type: A; B; C` without also stating **Primary classification** separately.
+
+### Duplication
+- No duplicate lockout coverage (trigger vs post-lockout only if distinct, requirement-grounded behavior)
+- No near-duplicates with Existing Test Cases or within NTC set (merge or cross-reference)
+- Cross-entity tests: state objective pass/fail criteria in Expected Results
+
+### Priority and severity
+- **One priority per case:** P0, P1, P2, or P3 only — no compound values
+- Include **Priority rationale** (one line) per test case
+- P0 = data loss, security breach, core requirement failure; P1 = important error handling; P2/P3 = edge UX or recommendation-only
+
+For each negative test case provide:
+- Test ID (NTC-001, NTC-002, ...)
+- Linked Scenario ID (SC-xxx) if applicable, or "N/A"
+- Title
+- Category (Functional / Negative / Boundary / Security / Validation / Performance)
+- Preconditions
+- Test Steps (numbered, complete or explicitly Blocked: Needs clarification)
+- Test Data
+- Expected Results
+- Primary classification — **exactly one** of: Requirement-derived / Needs clarification / Recommendation
+- Assertion tags — zero or more of the same values (comma-separated); must include the primary classification
+- Priority (P0/P1/P2/P3)
+- Priority rationale
+- Severity (Critical / Major / Minor / Trivial)
+
+### Generation Summary integrity (mandatory — read before writing summary)
+1. Write **all** test cases first, then compute the summary from them — never guess counts.
+2. Each NTC ID appears in **exactly one** category, **exactly one** priority bucket, and **exactly one** primary classification.
+3. For every summary row, list **unique** NTC IDs; **Count must equal the number of unique IDs** in that row.
+4. **Sum of category counts = Total.** Same for priority counts and **primary classification** counts.
+5. **Assertion tag counts are non-mutually-exclusive** — they may sum to more than Total; label that section clearly and do not compare tag totals to Total.
+6. **Never** publish draft counts, recounts, corrections, or sections titled "Corrected counts".
+7. If arithmetic does not reconcile while drafting, fix categorization first — output only the final, verified numbers once.
+
+Use this exact table format for category and priority counts:
+
+| Category | Count | NTC IDs |
+|----------|-------|---------|
+| Boundary | 5 | NTC-003, NTC-004, NTC-005, NTC-006, NTC-021 |
+
+| Priority | Count | NTC IDs |
+|----------|-------|---------|
+| P0 | 1 | NTC-008 |
+
+| Primary classification | Count | NTC IDs |
+|------------------------|-------|---------|
+| Needs clarification | 12 | NTC-001, ... |
+| **Total** | **22** | (all NTC IDs, each once) |
+
+| Assertion tag | Count | NTC IDs |
+|---------------|-------|---------|
+| Needs clarification | 18 | NTC-001, ... |
+
+*Assertion tags (non-mutually-exclusive): a test may appear in multiple tag rows; tag counts may exceed Total.*
+
+Format your response in markdown:
+
+## Negative Test Cases
+One subsection per test case (### NTC-001: Title) including all fields above.
+
+## Generation Summary
+- **Total negative test cases generated:** N (must equal highest NTC number and count of ### NTC-xxx sections)
+- Count by category — table with Count + unique NTC IDs (allowed enum only)
+- **Primary classification** — mutually exclusive table (Count + NTC IDs; **Total row must equal N**)
+- **Assertion tags** — separate table labeled *non-mutually-exclusive* (Count + NTC IDs per tag)
+- Count by priority — table with Count + unique NTC IDs
+- Risks covered; cases skipped due to overlap with Existing Test Cases
+
+## Self-check Results
+### Summary arithmetic verification
+| Check | Result |
+|-------|--------|
+| Total NTC sections = Total in summary | PASS / FAIL |
+| Sum of category counts = Total | PASS / FAIL |
+| Sum of priority counts = Total | PASS / FAIL |
+| Sum of primary classification counts = Total | PASS / FAIL |
+| Each primary classification Count = unique IDs in row | PASS / FAIL |
+| Each NTC in exactly one primary classification | PASS / FAIL |
+| Assertion tags section labeled non-mutually-exclusive | PASS / FAIL |
+| Each assertion tag Count = unique IDs in row | PASS / FAIL |
+| Each category Count = unique IDs in row | PASS / FAIL |
+| Each priority Count = unique IDs in row | PASS / FAIL |
+| No NTC ID duplicated within one row | PASS / FAIL |
+| Each NTC in exactly one category | PASS / FAIL |
+| No invalid category labels | PASS / FAIL |
+| No contradictory or self-correcting count text | PASS / FAIL |
+
+All checks must be **PASS** before finalizing. If any FAIL, fix the summary — do not output wrong counts with corrections.
+
+### Other checks
+- Duplicate/near-duplicate NTC pairs and resolution
+- Invalid category or priority values
+- Misclassified boundary vs negative cases
+- Lockout overlap
+- Assumptions presented as requirements
+- Clarification/recommendation cases not marked correctly
+- Incomplete or blocked steps
+- Cases adding no new coverage

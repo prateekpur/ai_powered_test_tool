@@ -23,6 +23,7 @@ class Session:
     negative_tests: str = ""
     security_tests: str = ""
     coverage_traceability: str = ""
+    schema_validation: str = ""
     remediation_log: str = ""
 
     def append_scenarios(self, text: str) -> None:
@@ -92,6 +93,7 @@ class Session:
                 self.negative_tests.strip(),
                 self.security_tests.strip(),
                 self.coverage_traceability.strip(),
+                self.schema_validation.strip(),
                 self.remediation_log.strip(),
             )
         )
@@ -129,6 +131,10 @@ class Session:
                     "Coverage/Traceability Validation",
                     self.coverage_traceability.strip(),
                 )
+            )
+        if self.schema_validation.strip():
+            sections.append(
+                ("schema_validation", "Schema Validation", self.schema_validation.strip())
             )
         if self.remediation_log.strip():
             sections.append(

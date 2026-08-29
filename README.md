@@ -47,29 +47,31 @@ ai-agent
 | 1 | Analyze Requirement | Capture requirement details and run analysis |
 | 2 | Generate Test Scenarios | High-level scenarios from requirement + analysis |
 | 3 | Generate Test Cases | Detailed test cases from scenarios |
-| 4 | Generate Negative Tests | Negative test cases *(prompt not wired yet)* |
-| 5 | Generate Security Tests | Security test cases *(prompt not wired yet)* |
-| 6 | Coverage/Traceability Validator | Audit coverage and traceability |
-| 7 | Remediate Coverage Gaps | Append new scenarios/tests to close gaps from option 6 |
-| 8 | Export Report | Export all session artifacts to `./reports/` |
-| 9 | Exit | Quit |
+| 4 | Validate Test Schema | Validate test case structure and fields |
+| 5 | Generate Negative Tests | Invalid-input, boundary, and error-handling test cases |
+| 6 | Generate Security Tests | Security test cases *(prompt not wired yet)* |
+| 7 | Coverage/Traceability Validator | Audit coverage and traceability |
+| 8 | Remediate Coverage Gaps | Append new scenarios/tests to close gaps from option 7 |
+| 9 | Export Report | Export all session artifacts to `./reports/` |
+| 10 | Exit | Quit |
 
 ### Recommended workflow
 
 ```
-1 → 2 → 3 → 6 → 7 → 6 → 8
+1 → 2 → 3 → 4 → 7 → 8 → 7 → 9
 ```
 
 1. **Analyze** the requirement
 2. **Generate scenarios** and **test cases**
-3. **Validate** coverage/traceability
-4. **Remediate** gaps (appends new SC/TC; does not overwrite)
-5. **Re-validate** until coverage is acceptable
-6. **Export** the full test plan
+3. **Validate** test case schema (option 4)
+4. **Validate** coverage/traceability (option 7)
+5. **Remediate** gaps (option 8; appends new SC/TC; does not overwrite)
+6. **Re-validate** until coverage is acceptable
+7. **Export** the full test plan
 
 ### Export layout
 
-Option 8 creates a timestamped folder:
+Option 9 creates a timestamped folder:
 
 ```
 reports/test_plan_YYYYMMDD_HHMMSS/
@@ -77,8 +79,9 @@ reports/test_plan_YYYYMMDD_HHMMSS/
 ├── analysis.md
 ├── test_scenarios.md
 ├── test_cases.md
+├── schema_validation.md        # if option 4 was run
 ├── coverage_traceability.md
-├── remediation_log.md          # if option 7 was run
+├── remediation_log.md          # if option 8 was run
 ├── test_report.md              # combined report
 └── manifest.json
 ```
@@ -108,6 +111,8 @@ src/ai_powered_agent/
     generate_test_cases_prompt.txt
     coverage_traceability_validator_prompt.txt
     remediate_gaps_prompt.txt
+    generate_negative_tests_prompt.txt
+    schema_validation_prompt.txt
 ```
 
 Edit prompt templates under `prompts/` to change LLM behavior. Wire new menu actions in `prompts.py` and `menu.py`.
@@ -123,6 +128,6 @@ Edit prompt templates under `prompts/` to change LLM behavior. Wire new menu act
 
 - Run from the repo root with `PYTHONPATH=src`
 
-**Option 4 or 5 says prompt not configured**
+**Option 5 or 6 says prompt not configured**
 
 - Add `generate_negative_tests()` / `generate_security_tests()` in `prompts.py` and matching `.txt` templates

@@ -18,18 +18,21 @@ For each new scenario include:
 - Main flow (brief steps)
 - Expected outcome
 - Linked gap(s)
-- Priority (P0/P1/P2)
+- Priority (P0/P1/P2/P3)
 
 For each new test case include:
 - Test ID (TC-xxx)
 - Linked Scenario ID (SC-xxx)
 - Title
+- Category — exactly one of: Functional, Negative, Boundary, Security, Validation, Performance
 - Preconditions
-- Test Steps (numbered)
+- Test Steps (numbered, complete or Blocked: Needs clarification)
 - Test Data
 - Expected Results
-- Assertion type: Requirement-derived / Needs clarification / Recommendation
-- Priority (P0/P1/P2)
+- Primary classification — exactly one of: Requirement-derived / Needs clarification / Recommendation
+- Assertion tags — zero or more (comma-separated); must include the primary classification
+- Priority — exactly one of P0, P1, P2, P3 (no compound values)
+- Severity (Critical / Major / Minor / Trivial)
 - Closes gap: <gap ID or description>
 
 Format your response in markdown with exactly these sections (leave a section empty if none apply):

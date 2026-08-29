@@ -15,6 +15,7 @@ MENU_OPTIONS = [
     "Analyze Requirement",
     "Generate Test Scenarios",
     "Generate Test Cases",
+    "Validate Test Schema",
     "Generate Negative Tests",
     "Generate Security Tests",
     "Coverage/Traceability Validator",
@@ -117,7 +118,7 @@ def _require_coverage_validation(session: Session) -> bool:
         return False
     if session.coverage_traceability.strip():
         return True
-    print("Run Coverage/Traceability Validator first (option 6).")
+    print("Run Coverage/Traceability Validator first (option 7).")
     _pause()
     return False
 
@@ -207,6 +208,26 @@ def _generate_test_cases(session: Session, cwd: Path) -> None:
         _pause()
 
 
+def _validate_test_schema(session: Session, cwd: Path) -> None:
+    if not _require_test_cases(session):
+        return
+
+    prompt = _build_prompt(
+        "validate_test_schema",
+        scenarios=session.test_scenarios,
+        test_cases=session.test_cases,
+        negative_tests=session.negative_tests,
+    )
+    if prompt is None:
+        return
+
+    result = _run_action(cwd, prompt)
+    if result is not None:
+        session.schema_validation = result
+        print("\nSchema validation saved to session.")
+        _pause()
+
+
 def _generate_negative_tests(session: Session, cwd: Path) -> None:
     if not _require_analysis(session):
         return
@@ -215,6 +236,8 @@ def _generate_negative_tests(session: Session, cwd: Path) -> None:
         "generate_negative_tests",
         requirement=session.requirement,
         analysis=session.analysis,
+        scenarios=session.test_scenarios,
+        test_cases=session.test_cases,
     )
     if prompt is None:
         return
@@ -297,7 +320,7 @@ def _remediate_coverage_gaps(session: Session, cwd: Path) -> None:
         if cases_added:
             parts.append("test cases")
         print(f"\nRemediation appended to session: {', '.join(parts)}.")
-        print("Re-run option 6 (Coverage/Traceability Validator) to verify gaps are closed.")
+        print("Re-run option 7 (Coverage/Traceability Validator) to verify gaps are closed.")
     else:
         print("\nNo new scenarios or test cases were parsed from the response.")
         print("Check Remediation summary in the LLM output or re-run remediation.")
@@ -332,12 +355,13 @@ def run_menu(cwd: Path, output_dir: Path) -> None:
         1: lambda: _analyze_requirement(session, cwd),
         2: lambda: _generate_test_scenarios(session, cwd),
         3: lambda: _generate_test_cases(session, cwd),
-        4: lambda: _generate_negative_tests(session, cwd),
-        5: lambda: _generate_security_tests(session, cwd),
-        6: lambda: _validate_coverage_traceability(session, cwd),
-        7: lambda: _remediate_coverage_gaps(session, cwd),
-        8: lambda: _export_report(session, output_dir),
-        9: None,
+        4: lambda: _validate_test_schema(session, cwd),
+        5: lambda: _generate_negative_tests(session, cwd),
+        6: lambda: _generate_security_tests(session, cwd),
+        7: lambda: _validate_coverage_traceability(session, cwd),
+        8: lambda: _remediate_coverage_gaps(session, cwd),
+        9: lambda: _export_report(session, output_dir),
+        10: None,
     }
 
     while True:
@@ -345,18 +369,18 @@ def run_menu(cwd: Path, output_dir: Path) -> None:
         choice = input("\nSelect an option: ").strip()
 
         if not choice.isdigit():
-            print("Enter a number from 1 to 9.")
+            print("Enter a number from 1 to 10.")
             _pause()
             continue
 
         option = int(choice)
-        if option == 9:
+        if option == 10:
             print("Goodbye.")
             return
 
         handler = handlers.get(option)
         if handler is None:
-            print("Invalid option. Choose 1-9.")
+            print("Invalid option. Choose 1-10.")
             _pause()
             continue
 

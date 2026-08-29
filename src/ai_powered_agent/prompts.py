@@ -37,6 +37,25 @@ def generate_test_cases(
     )
 
 
+def generate_negative_tests(
+    requirement: Requirement,
+    analysis: RequirementAnalysis,
+    scenarios: str = "",
+    test_cases: str = "",
+) -> str:
+    template = _load_prompt_template("generate_negative_tests_prompt.txt")
+    sections = [
+        f"{template}\n",
+        f"## Requirement\n\n{requirement.to_markdown()}",
+        f"## Analysis\n\n{analysis.to_markdown()}",
+    ]
+    if scenarios.strip():
+        sections.append(f"## Existing Test Scenarios\n\n{scenarios.strip()}")
+    if test_cases.strip():
+        sections.append(f"## Existing Test Cases\n\n{test_cases.strip()}")
+    return "\n\n".join(sections)
+
+
 def validate_coverage_traceability(
     requirement: Requirement,
     analysis: RequirementAnalysis,
@@ -82,4 +101,21 @@ def remediate_coverage_gaps(
         sections.append(f"## Existing Negative Tests\n\n{negative_tests.strip()}")
     if security_tests.strip():
         sections.append(f"## Existing Security Tests\n\n{security_tests.strip()}")
+    return "\n\n".join(sections)
+
+
+def validate_test_schema(
+    scenarios: str,
+    test_cases: str,
+    negative_tests: str = "",
+) -> str:
+    template = _load_prompt_template("schema_validation_prompt.txt")
+    sections = [
+        f"{template}\n",
+        f"## Test Scenarios\n\n{scenarios.strip()}",
+        f"## Test Cases\n\n{test_cases.strip()}",
+    ]
+    if negative_tests.strip():
+        negative_template = _load_prompt_template("validate_negative_tests_prompt.txt")
+        sections.append(f"{negative_template}\n\n## Negative Tests\n\n{negative_tests.strip()}")
     return "\n\n".join(sections)
