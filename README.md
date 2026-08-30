@@ -49,7 +49,7 @@ ai-agent
 | 3 | Generate Test Cases | Detailed test cases from scenarios, plus boundary value tests (BTC-xxx) |
 | 4 | Validate Test Schema | Validate test case structure and fields |
 | 5 | Generate Negative Tests | Invalid-input, boundary, and error-handling test cases |
-| 6 | Generate Security Tests | Security test cases *(prompt not wired yet)* |
+| 6 | Generate Security Tests | Injection, XSS, auth, and other security test cases (STC-xxx) |
 | 7 | Coverage/Traceability Validator | Audit coverage and traceability |
 | 8 | Remediate Coverage Gaps | Append new scenarios/tests to close gaps from option 7 |
 | 9 | Export Report | Export all session artifacts to `./reports/` |
@@ -58,16 +58,17 @@ ai-agent
 ### Recommended workflow
 
 ```
-1 → 2 → 3 → 4 → 7 → 8 → 7 → 9
+1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 7 → 9
 ```
 
 1. **Analyze** the requirement
 2. **Generate scenarios**, **test cases**, and **boundary value tests** (option 3 runs both TC and BTC generation)
 3. **Validate** test case schema (option 4)
-4. **Validate** coverage/traceability (option 7)
-5. **Remediate** gaps (option 8; appends new SC/TC; does not overwrite)
-6. **Re-validate** until coverage is acceptable
-7. **Export** the full test plan
+4. **Generate negative and security tests** (options 5–6) as needed
+5. **Validate** coverage/traceability (option 7)
+6. **Remediate** gaps (option 8; appends new SC/TC; does not overwrite)
+7. **Re-validate** until coverage is acceptable
+8. **Export** the full test plan
 
 ### Export layout
 
@@ -80,6 +81,8 @@ reports/test_plan_YYYYMMDD_HHMMSS/
 ├── test_scenarios.md
 ├── test_cases.md
 ├── schema_validation.md        # if option 4 was run
+├── negative_tests.md           # if option 5 was run
+├── security_tests.md           # if option 6 was run
 ├── coverage_traceability.md
 ├── remediation_log.md          # if option 8 was run
 ├── test_report.md              # combined report
@@ -113,7 +116,10 @@ src/ai_powered_agent/
     remediate_gaps_prompt.txt
     generate_negative_tests_prompt.txt
     generate_boundary_tests_prompt.txt
+    generate_security_tests_prompt.txt
     schema_validation_prompt.txt
+    validate_negative_tests_prompt.txt
+    validate_security_tests_prompt.txt
 ```
 
 Edit prompt templates under `prompts/` to change LLM behavior. Wire new menu actions in `prompts.py` and `menu.py`.
@@ -129,6 +135,6 @@ Edit prompt templates under `prompts/` to change LLM behavior. Wire new menu act
 
 - Run from the repo root with `PYTHONPATH=src`
 
-**Option 5 or 6 says prompt not configured**
+**Option 6 says prompt not configured**
 
-- Add `generate_negative_tests()` / `generate_security_tests()` in `prompts.py` and matching `.txt` templates
+- Ensure `generate_security_tests()` exists in `prompts.py` and `generate_security_tests_prompt.txt` is present under `prompts/`

@@ -236,6 +236,7 @@ def _validate_test_schema(session: Session, cwd: Path) -> None:
         scenarios=session.test_scenarios,
         test_cases=session.test_cases,
         negative_tests=session.negative_tests,
+        security_tests=session.security_tests,
     )
     if prompt is None:
         return
@@ -276,6 +277,9 @@ def _generate_security_tests(session: Session, cwd: Path) -> None:
         "generate_security_tests",
         requirement=session.requirement,
         analysis=session.analysis,
+        scenarios=session.test_scenarios,
+        test_cases=session.test_cases,
+        negative_tests=session.negative_tests,
     )
     if prompt is None:
         return
