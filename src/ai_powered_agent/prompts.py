@@ -37,6 +37,25 @@ def generate_test_cases(
     )
 
 
+def generate_boundary_tests(
+    requirement: Requirement,
+    analysis: RequirementAnalysis,
+    scenarios: str = "",
+    test_cases: str = "",
+) -> str:
+    template = _load_prompt_template("generate_boundary_tests_prompt.txt")
+    sections = [
+        f"{template}\n",
+        f"## Requirement\n\n{requirement.to_markdown()}",
+        f"## Analysis\n\n{analysis.to_markdown()}",
+    ]
+    if scenarios.strip():
+        sections.append(f"## Existing Test Scenarios\n\n{scenarios.strip()}")
+    if test_cases.strip():
+        sections.append(f"## Existing Test Cases\n\n{test_cases.strip()}")
+    return "\n\n".join(sections)
+
+
 def generate_negative_tests(
     requirement: Requirement,
     analysis: RequirementAnalysis,

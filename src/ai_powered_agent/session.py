@@ -36,11 +36,11 @@ class Session:
         else:
             self.test_scenarios = text
 
-    def append_test_cases(self, text: str) -> None:
+    def append_test_cases(self, text: str, *, section: str = "Remediation additions (test cases)") -> None:
         text = text.strip()
         if not text:
             return
-        separator = "\n\n---\n\n## Remediation additions (test cases)\n\n"
+        separator = f"\n\n---\n\n## {section}\n\n"
         if self.test_cases.strip():
             self.test_cases = self.test_cases.rstrip() + separator + text
         else:

@@ -46,7 +46,7 @@ ai-agent
 |---|--------|-------------|
 | 1 | Analyze Requirement | Capture requirement details and run analysis |
 | 2 | Generate Test Scenarios | High-level scenarios from requirement + analysis |
-| 3 | Generate Test Cases | Detailed test cases from scenarios |
+| 3 | Generate Test Cases | Detailed test cases from scenarios, plus boundary value tests (BTC-xxx) |
 | 4 | Validate Test Schema | Validate test case structure and fields |
 | 5 | Generate Negative Tests | Invalid-input, boundary, and error-handling test cases |
 | 6 | Generate Security Tests | Security test cases *(prompt not wired yet)* |
@@ -62,7 +62,7 @@ ai-agent
 ```
 
 1. **Analyze** the requirement
-2. **Generate scenarios** and **test cases**
+2. **Generate scenarios**, **test cases**, and **boundary value tests** (option 3 runs both TC and BTC generation)
 3. **Validate** test case schema (option 4)
 4. **Validate** coverage/traceability (option 7)
 5. **Remediate** gaps (option 8; appends new SC/TC; does not overwrite)
@@ -112,6 +112,7 @@ src/ai_powered_agent/
     coverage_traceability_validator_prompt.txt
     remediate_gaps_prompt.txt
     generate_negative_tests_prompt.txt
+    generate_boundary_tests_prompt.txt
     schema_validation_prompt.txt
 ```
 

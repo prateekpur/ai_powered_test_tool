@@ -202,10 +202,29 @@ def _generate_test_cases(session: Session, cwd: Path) -> None:
         return
 
     result = _run_action(cwd, prompt)
-    if result is not None:
-        session.test_cases = result
-        print("\nTest cases saved to session.")
+    if result is None:
+        return
+
+    session.test_cases = result
+    print("\nCore test cases saved to session.")
+
+    boundary_prompt = _build_prompt(
+        "generate_boundary_tests",
+        requirement=session.requirement,
+        analysis=session.analysis,
+        scenarios=session.test_scenarios,
+        test_cases=result,
+    )
+    if boundary_prompt is None:
         _pause()
+        return
+
+    print("\nGenerating boundary value tests...")
+    boundary_result = _run_action(cwd, boundary_prompt)
+    if boundary_result is not None:
+        session.append_test_cases(boundary_result, section="Boundary value test cases")
+        print("Boundary value tests appended to session.")
+    _pause()
 
 
 def _validate_test_schema(session: Session, cwd: Path) -> None:

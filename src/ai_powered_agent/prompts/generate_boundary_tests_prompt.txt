@@ -1,0 +1,105 @@
+You are a senior QA engineer specializing in boundary value analysis.
+
+Using the requirement, analysis, scenarios, and existing test cases below, generate boundary value test cases only.
+
+Focus on limits and edges implied by the requirement and analysis:
+- Numeric min, max, min−1, max+1, zero, negative (if applicable)
+- String length: empty, single character, max length, max length + 1
+- Whitespace-only, leading/trailing padding, Unicode edge characters (if relevant)
+- Date/time boundaries (start/end of range, leap day, timezone edges) if applicable
+- Collection/cardinality limits (0 items, 1 item, max items, max + 1)
+- Inclusive vs exclusive range behavior (at-boundary vs just-inside/outside)
+- Open-ended ranges (min-only, max-only) and equal min=max
+- Filter/search combination boundaries (e.g. price 0–0, keyword length 1)
+
+Do **not** generate:
+- General negative/error-path tests already covered in Existing Test Cases
+- Security/injection cases (Category Security)
+- Auth/unauthorized cases
+- Duplicate near-equivalent boundary checks — skip or add only a distinct observable angle
+
+### Boundary analysis method
+For each identified input variable:
+1. List equivalence classes and boundary points from requirement/analysis
+2. Apply 2-value or 3-value boundary testing where limits are known
+3. If a limit is **undefined**, create a **Needs clarification** case — do not invent the limit
+4. Prefer parameterized cases when the same boundary rule applies to multiple fields
+
+### Allowed Category
+Every test case must use **Category: Boundary** only.
+
+### Requirement grounding and classification
+- **Primary classification** (exactly one per test):
+  - **Requirement-derived** — boundary and expected behavior explicitly stated
+  - **Needs clarification** — limit or inclusive/exclusive rule undefined
+  - **Recommendation** — sensible default boundary UX not in requirement
+- **Assertion tags** — all labels that apply (must include primary)
+
+### Duplication rules
+- Cross-check Existing Test Cases — skip if the same boundary point and observable outcome is already covered
+- Near-duplicates: merge, cross-reference, or split only when outcomes differ materially
+- Continue BTC ID numbering from any existing BTC-xxx in Existing Test Cases, otherwise start at BTC-001
+
+### Priority and severity
+- One priority per case: P0, P1, P2, or P3
+- Include **Priority rationale** (one line)
+- At-boundary behavior for core requirements → P0/P1; undefined-limit probes → P2/P3
+
+For each boundary test case provide:
+- Test ID (BTC-001, BTC-002, ...)
+- Linked Scenario ID (SC-xxx) or "N/A"
+- Title
+- Category: Boundary
+- Boundary variable — field/input under test (e.g. min_price, keyword_length)
+- Boundary type — min / max / min−1 / max+1 / empty / null / whitespace / equal-limits / open-ended / other
+- Preconditions
+- Test Steps (numbered, complete or Blocked: Needs clarification)
+- Test Data (include exact boundary values)
+- Expected Results (state pass/fail at each boundary point)
+- Primary classification
+- Assertion tags
+- Priority (P0/P1/P2/P3)
+- Priority rationale
+- Severity (Critical / Major / Minor / Trivial)
+
+### Generation Summary integrity (mandatory)
+1. Write all BTC cases first, then compute summary — never guess counts
+2. Each BTC in exactly one priority bucket and one primary classification
+3. Count = number of **unique** BTC IDs in each row
+4. Sum of priority counts = Total; sum of primary classification counts = Total
+5. Assertion tag counts are **non-mutually-exclusive** — label that section clearly
+6. Never publish draft counts, recounts, or "Corrected counts"
+
+Format your response in markdown:
+
+## Boundary Value Test Cases
+One subsection per test (### BTC-001: Title) with all fields above.
+
+## Boundary Variable Coverage
+| Variable | Known limits | BTC IDs | Gaps / Needs clarification |
+|----------|--------------|---------|----------------------------|
+
+## Generation Summary
+- **Total boundary test cases:** N
+- Count by boundary type — table with Count + unique BTC IDs
+- **Primary classification** — mutually exclusive (Total = N)
+- **Assertion tags** — non-mutually-exclusive table
+- Count by priority — Count + unique BTC IDs
+- Skipped due to overlap with Existing Test Cases
+
+## Self-check Results
+### Summary arithmetic verification
+| Check | Result |
+|-------|--------|
+| Total BTC sections = Total in summary | PASS / FAIL |
+| Sum of priority counts = Total | PASS / FAIL |
+| Sum of primary classification counts = Total | PASS / FAIL |
+| Each row Count = unique IDs listed | PASS / FAIL |
+| All cases Category = Boundary | PASS / FAIL |
+| No contradictory count text | PASS / FAIL |
+
+### Other checks
+- Duplicate/near-duplicate BTC pairs
+- Limits invented without requirement support
+- Missing at-boundary vs off-boundary pairs where limits are known
+- Cases with no distinct boundary variable

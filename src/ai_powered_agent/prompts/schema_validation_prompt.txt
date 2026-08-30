@@ -5,7 +5,7 @@ Validate each test case against the rules below.
 ### Field presence
 | Field | Validation |
 |-------|------------|
-| Test Case ID | Present, unique, format TC-NNN (or NTC-NNN for negative tests) |
+| Test Case ID | Present, unique, format TC-NNN, BTC-NNN (boundary), or NTC-NNN (negative) |
 | Scenario ID | Present; must reference a defined scenario in Test Scenarios |
 | Title | Present |
 | Category | Present; must be an allowed value |
