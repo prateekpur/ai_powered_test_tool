@@ -1,26 +1,42 @@
 You are a senior QA engineer and test auditor.
 
-Review the requirement, analysis, scenarios, and test cases below. Validate coverage and traceability.
+Review the requirement, analysis, scenarios, and test cases below. Validate coverage, traceability, and **requirement confidence**.
 
 Produce:
 
 ## Traceability matrix
-Map each requirement / acceptance criterion / identified risk to the scenario(s) and test case(s) that cover it.
-Use a table with columns: Source ID, Source item, Scenario ID, Test case ID, Coverage status (Covered / Partial / Not covered).
+Map each requirement / acceptance criterion / identified risk to scenario(s) and test case(s).
+Columns: Source ID, Source item, Scenario ID, Test case ID, Coverage status (Covered / Partial / Not covered).
+
+## Requirement coverage and confidence
+For each scenario (SC-xxx):
+| SC-xxx | Executable TCs | Gap IDs (RG-xxx) | Coverage % | Requirement confidence (High/Med/Low) | Blocking ambiguities |
+
+Flag scenarios with Low confidence where gaps block deterministic testing (e.g. discount base undefined, expiry semantics undefined).
 
 ## Coverage gaps
-List items with no or partial coverage. For each gap include:
+Items with no or partial coverage. For each:
 - What is missing
-- Recommended scenario or test case to add
-- Priority (P0/P1/P2)
+- Is it blocked by requirement gap? (RG-xxx)
+- Recommended action: clarify requirement / add executable TC / add candidate test / parameterized matrix
+- Priority (P0–P3)
 
-## Orphan tests
-List scenarios or test cases that do not trace back to a requirement, acceptance criterion, or identified risk.
+## Orphan and redundant tests
+- Tests not tracing to requirement, criterion, or risk
+- **Business rule duplicates:** groups sharing same rule (duplicate apply / duplicate submission consistency) — list all TC/BTC/NTC IDs
+- Sequential duplicate submit mislabeled Concurrency (list TC-xxx)
+- Near-duplicate groups that should merge (list IDs + recommended single TC with matrix rows)
+
+## Suite quality metrics
+- Executable vs Recommended vs Gap-only ratio
+- Estimated redundant test count
+- Concurrency tests miscategorized as Performance (if any)
 
 ## Summary
 - Total requirements / criteria checked
 - Coverage percentage estimate
-- Top 3 risks from uncovered areas
+- Requirement confidence distribution (High / Medium / Low scenarios)
+- Top 3 risks from uncovered or low-confidence areas
 - Overall verdict: Adequate / Needs improvement / Insufficient
 
-Be specific. Reference IDs from the artifacts when available.
+Be specific. Reference IDs from artifacts.

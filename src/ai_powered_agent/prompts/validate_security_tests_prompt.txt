@@ -9,6 +9,7 @@ Validate the Security Tests artifact below — both individual test cases **and*
 | Category | Present; must be **Security** only |
 | Threat type | Present |
 | Attack surface | Present |
+| Test objective | Present when generator includes it |
 | Priority | Present; exactly one of P0, P1, P2, P3 |
 | Severity | Present |
 | Test Steps | Numbered, complete or explicitly Blocked |
@@ -16,14 +17,26 @@ Validate the Security Tests artifact below — both individual test cases **and*
 | Assertion tags | Present; must include the primary classification |
 
 **FAIL** if only legacy `Assertion type` is present without **Primary classification**.
+**FAIL** rate-limit tests without N/T contract or weak "many requests" without expected throttle response.
+**FAIL** SQLi/command payloads on surfaces where attack class is implausible.
+**FAIL** if core STC count >8 without documented multi-surface justification.
+**FAIL** if Tier-2 conditional tests (session swap, ID enumeration, CSP/framing, ZIP bomb, presigned URL replay) appear as executable STCs without explicit architecture/policy trigger in requirement/analysis.
+**WARN** if core STC count <5 when feature has clear user-scoped resources or file upload surface.
+
+### Suite structure
+- **Security Test Cases** — Core tier only (target 7–8)
+- **Conditional Security Tests (deferred)** — not counted in STC total
+- Deferred tests must not be duplicated as full STCs without trigger
 
 ### Generation Summary integrity (critical)
 Recompute counts from the test-case body — do not trust stated counts without verification.
 
-**Mutually exclusive partitions** (each STC in exactly one row; sums must equal Total):
+**Mutually exclusive partitions** (each STC in exactly one row per dimension; sums must equal Total):
 - Threat type (or category if used)
 - Priority
 - Primary classification
+
+**Partition rule:** Every STC ID must appear **exactly once** in each mutually exclusive summary dimension.
 
 For each mutually exclusive summary row:
 1. Extract listed STC IDs
@@ -44,6 +57,8 @@ Format your response in markdown:
 One subsection per STC (### STC-xxx) with field pass/fail.
 
 ## Generation Summary Audit
+- Core STC count vs 7–8 target
+- Tier-2 tests incorrectly promoted to STC
 - Recomputed threat-type, priority, and primary classification counts
 - Recomputed assertion tag counts (non-mutually-exclusive)
 - Partition checks and duplicate ID detection

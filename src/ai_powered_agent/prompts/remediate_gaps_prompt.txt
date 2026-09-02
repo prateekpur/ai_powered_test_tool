@@ -25,6 +25,7 @@ For each new test case include:
 - Linked Scenario ID (SC-xxx)
 - Title
 - Category — exactly one of: Functional, Negative, Boundary, Security, Validation, Performance
+- Test objective — exactly one of: Calculation, Eligibility, State management, Concurrency, Duplicate submission consistency, Authorization, Data integrity, Abuse prevention, Input validation, Persistence, Payment integrity, Error handling, Observability
 - Preconditions
 - Test Steps (numbered, complete or Blocked: Needs clarification)
 - Test Data

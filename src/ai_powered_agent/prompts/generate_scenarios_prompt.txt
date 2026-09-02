@@ -6,7 +6,7 @@ Base your scenarios on:
 - Actors identified in the analysis
 - Feature behavior and boundaries
 - Inputs and expected outputs
-- Risks called out in the analysis
+- Risks and **Requirement Gaps** from the analysis
 
 For each scenario provide:
 - Scenario ID (SC-001, SC-002, ...)
@@ -16,12 +16,32 @@ For each scenario provide:
 - Main flow (brief steps)
 - Expected outcome
 - Linked risks (from analysis)
-- Priority (P0/P1/P2)
+- Linked requirement gaps (RG-xxx) if behavior is partially undefined
+- **Requirement confidence** — High / Medium / Low for this scenario
+- Priority (P0/P1/P2/P3)
+
+Rules:
+- Do **not** create scenarios that assume undefined rules (e.g. "15% off subtotal" when discount base is undefined) — link to RG-xxx instead
+- Flag scenarios blocked by gaps with confidence **Low** and note blocking gap IDs
+- Prefer fewer, well-scoped scenarios over exhaustive enumeration
+- Include **concurrent** race scenarios (double-submit overlap, multi-tab) — distinct from sequential duplicate submit and from latency/performance
 
 Cover:
-- Happy path for each actor
+- Happy path for each actor (where requirements are clear)
 - Alternate flows
-- Edge cases implied by inputs/outputs
-- At least one scenario per identified risk
+- Edge cases with **defined** limits only
+- At least one scenario per identified risk with High/Medium impact
+- Scenarios for requirement gaps only as **"pending clarification"** — not as executable flows
 
 Do not write detailed step-by-step test cases yet — scenarios only.
+
+Format your response in markdown:
+
+## Test Scenarios
+One subsection per scenario (### SC-001: Title) with all fields above.
+
+## Scenario Summary
+- Total scenarios
+- Count by requirement confidence (High / Medium / Low)
+- Scenarios blocked by requirement gaps (SC-xxx → RG-xxx)
+- Gaps with no scenario yet

@@ -1,99 +1,208 @@
 You are a senior QA engineer.
 
-Using the Test Scenarios section below, generate detailed step-by-step test cases.
+Using the Test Scenarios and analysis below, produce test artifacts in **three separate sections**.
 
-Base your tests on:
-- Scenarios identified in the previous step
-- Feature behavior and boundaries
-- Inputs and expected outputs
-- Risks called out in the analysis
+**Optimize for meaningful coverage, not test count.** Prefer parameterized/matrix tests over many near-duplicate cases. If a rule is undefined, record a **Requirement Gap** — do not generate multiple blocked executable tests.
+
+---
+
+## Section 1: Executable Test Cases
+Tests that can run **today** with deterministic pass/fail from stated requirements.
 
 For each test case provide:
-- Test ID (TC-001, TC-002, ...) — unique, format TC-NNN
-- Linked Scenario ID (SC-xxx) — required for every test case; must reference a defined scenario
+- Test ID (TC-001, TC-002, …) — unique, format TC-NNN
+- Linked Scenario ID (SC-xxx) — required
 - Title
-- Category — **exactly one** allowed value (see below)
+- **Business rule ID** — BR-001, BR-002, … (see deduplication rules below)
+- **Category** — exactly one (see below)
+- **Test objective** — exactly one (see below); separate from category
 - Preconditions
-- Test Steps (numbered, complete, and executable — no conditional gaps)
+- Test Steps (numbered, fully executable — no "Blocked: Needs clarification")
 - Test Data
-- Expected Results
-- Primary classification — **exactly one** of: Requirement-derived / Needs clarification / Recommendation
-- Assertion tags — zero or more of the same values (comma-separated); must include the primary classification
-- Priority — **exactly one** of P0, P1, P2, P3 (no compound values, no parenthetical variants)
-- Severity (Critical / Major / Minor / Trivial)
+- Expected Results — use **contract-level** assertions where possible (`errorCode`, numeric totals, HTTP status) before UI copy
+- Primary classification: **Requirement-derived** only (executable section)
+- Assertion tags (include Requirement-derived)
+- Priority — exactly one of P0, P1, P2, P3
+- Severity — use impact-based rules below
+- Cross-references — optional links to related TC-xxx (verify IDs exist)
 
-### Allowed Category values (use only these)
+### Category (test type — exactly one)
 | Category | Use when |
 |----------|----------|
-| **Functional** | Happy path, core requirement behavior, filter/search flows, state changes |
-| **Negative** | Invalid input, error paths, no-results, rejected operations |
-| **Boundary** | Min/max limits, empty/null, off-by-one, whitespace-only, edge thresholds |
-| **Security** | Injection, authz, XSS, unsafe input handling |
-| **Validation** | Input format rules, clarification-heavy UX (empty keyword, no-results messaging) |
-| **Performance** | Latency, rapid/resubmit, load, sync timing |
+| **Functional** | Happy path, state changes, duplicate-submission and concurrent flows |
+| **Negative** | Invalid input, rejected operations, error paths |
+| **Boundary** | At-limit behavior when limit is **defined** in requirement |
+| **Security** | Auth, tampering, injection with plausible attack surface |
+| **Validation** | Input format rules with defined constraints |
+| **Performance** | Latency, throughput, SLA — **not** double-submit or race conditions |
 
-Do **not** use: `Core requirement tests`, `Requirement clarification tests`, `Security/non-functional recommendations`, or any other label.
+### Test objective (exactly one — orthogonal to category)
+Calculation | Eligibility | State management | Concurrency | Duplicate submission consistency | Authorization | Data integrity | Abuse prevention | Input validation | Persistence | Payment integrity | Error handling | Observability
 
-### Category mapping (common mistakes to avoid)
-- Core/happy-path requirement coverage → **Functional**
-- No-results / empty input / format checks → **Validation** or **Negative** (by intent)
-- Limit/threshold/whitespace boundary → **Boundary**
-- Injection / unsafe payloads → **Security**
-- Rapid submit / sync wait / timing → **Performance** or **Functional** (not Security unless threat-based)
+**Mapping examples:**
+- **Sequential** duplicate apply (same session, apply twice in order, no parallel overlap) → Objective: **Duplicate submission consistency** — **NOT** Concurrency
+- **Concurrent** duplicate apply (double-click, two tabs, parallel/overlapping requests) → Objective: **Concurrency**
+- Cart change after coupon applied → Objective: **Eligibility** or **State management**
+- Percentage discount math → Objective: **Calculation**
+- User A modifies User B's order → Objective: **Authorization**; Category: **Security**
 
-### Priority rules
-- Assign **one** priority per test case: P0, P1, P2, or P3 only.
-- Do **not** write compound priorities (e.g. `P0 (P1 for variants)`).
-- If variants need different priorities, split into **separate test cases** (e.g. TC-011a P0, TC-011b P1) or use a parameterized table where **each row maps to one scenario and one priority**.
-- Inherit priority from linked scenario when possible; document in Generation Summary if overridden.
+**Terminology:** Do **not** use "idempotency" in titles, business rules, or objectives unless the requirement **explicitly** defines an idempotency policy. Until then use **duplicate submission consistency** (same input re-submitted → consistent outcome per requirement or gap).
 
-### Primary classification vs assertion tags
-- **Primary classification** — exactly one per test; drives mutually exclusive summary counts:
-  - **Requirement-derived** — pass/fail criteria explicitly supported by requirement or scenario
-  - **Needs clarification** — blocked or outcome undefined until spec is confirmed
-  - **Recommendation** — best practice / security / UX suggestion not stated in requirement
-- **Assertion tags** — list every label that applies (including the primary). Tags overlap across tests; tag summary counts are **non-mutually-exclusive** and may sum to more than total test cases.
+### Severity (impact-based — avoid Critical inflation)
+| Situation | Severity |
+|-----------|----------|
+| Arbitrary discount / financial loss / wrong payment amount | Critical |
+| Authorization bypass / usage-limit bypass | Critical |
+| Duplicate coupon application causing double discount | Critical |
+| Expired/invalid coupon accepted **with** discount applied | Critical or Major |
+| Expired/invalid coupon accepted **without** discount | Major |
+| Wrong or generic error message only | Minor |
+| Case sensitivity / label copy / max-length UX | Minor |
 
-### Steps and assumptions
-- Every step must be actionable. If a step cannot run until spec is clarified (e.g. sync SLA undefined), mark the step **Blocked: Needs clarification** and list in Self-check — do not leave vague waits ("wait for sync") without criteria.
-- Never turn an assumption, best practice, or inferred behavior into an Expected Result unless explicitly stated in the requirement or scenario, or labeled Needs clarification / Recommendation.
-- Do not invent UI messages, session behavior, matching rules (case sensitivity, partial match), or filter AND/OR logic unless requirement-backed or flagged Needs clarification.
+### Business rule deduplication (strict — most important quality gate)
 
-### Duplication and parameterization
-- Detect duplicate/overlapping test cases before finalizing. Prefer parameterized cases for same behavior with multiple input values.
-- **Near-duplicates are not allowed** (e.g. two TCs for rapid/overlapping submissions) — merge, cross-reference, or split by distinct observable outcome.
-- Do not duplicate security-focused cases as functional cases (keep Functional vs Security separation clear).
+**One executable test per business rule.** A business rule is the single verifiable policy under test, e.g.:
+- BR-DUP-SUBMIT — Re-applying the same valid coupon does not increase discount (use **duplicate submission consistency** wording unless requirement says "idempotent")
+- BR-REJECT-EXPIRED — Expired coupon is rejected and no discount applied
+- BR-MIN-CART — Cart below minimum after apply invalidates or removes coupon
 
-Cover:
-- Happy path for each scenario
-- Alternate flows
-- Edge cases implied by inputs/outputs
-- At least one test case per scenario (SC-xxx)
+Before writing tests:
+1. List all distinct business rules implied by requirements (typically 12–20 for a feature this size)
+2. Assign **exactly one** TC per rule in the executable suite
+3. Use a **matrix inside that TC** for multiple inputs/outcomes of the **same** rule
 
-Format your response in markdown:
+**FAIL deduplication** (do not generate separate TCs) when tests differ only by:
+- Wording of the same outcome ("discount unchanged" vs "response unchanged" vs "zero monetary delta")
+- Same action replayed with same preconditions (sequential apply twice = double-click apply = "duplicate apply" unless mechanisms differ materially)
+- Same rejection case already covered in a matrix row of another TC
 
-## Test Cases
-One subsection per test case (### TC-001: Title) including all fields above.
+**Allowed second test for duplicate submission** only when mechanisms differ:
+- **Sequential** re-apply → one TC, Objective: Duplicate submission consistency
+- **Concurrent** (double-click vs multi-tab) → at most one TC **each**, Objective: Concurrency
+- Do **not** label sequential duplicate submit as Concurrency
+
+**Cap duplicate-apply coverage** in executable suite:
+- At most **one** TC for sequential/repeated apply (Objective: Duplicate submission consistency)
+- At most **one** TC per **concurrent** mechanism (double-click, multi-tab — Objective: Concurrency)
+- Do **not** add TCs that re-verify "discount unchanged" under the same mechanism
+
+If a matrix row in TC-010 already covers "duplicate apply → rejected/no extra discount", do **not** add TC-005, TC-011, TC-017 for the same rule.
+
+### Executable test rules
+- Do **not** put undefined-rule tests here — use Section 2 (Requirement Gaps)
+- Do **not** put security-hardening not in requirements here — use Section 3 (Recommended Tests)
+- **Parameterized/matrix:** consolidate near-duplicates (e.g. cart-before/after minimum) into one TC with a table of Initial → Modified → Expected
+- **Calculation:** distinguish discount calculation from final order total (tax/shipping recalculation)
+- **Time boundaries:** express as T = expiry ± ε per contract; do not assume midnight inclusive without requirement
+- **Rate limits:** only executable if N requests / T seconds is defined; otherwise → Requirement Gap
+- **Cross-references:** every "see TC-xxx" must point to an existing ID in this output
+
+---
+
+## Section 2: Requirement Gaps
+Questions and **minimal** candidate tests where requirements prevent deterministic execution.
+
+For each gap:
+- Gap ID (RG-xxx — reuse from analysis if present, else RG-001…)
+- Topic
+- Clarifying question
+- Linked Scenario ID(s)
+- **Candidate test** — at most **one** per gap (TC-CAND-001 format OR descriptive title only)
+- Why executable tests were not generated for this topic
+
+Do **not** write full blocked test cases with long step lists here.
+
+---
+
+## Section 3: Recommended Tests
+Security, robustness, observability, or best-practice tests **not** explicitly required but valuable.
+
+Same fields as executable tests except:
+- Primary classification: **Recommendation** (or Needs clarification if control undefined)
+- May include blocked steps if recommendation depends on undefined policy
+
+---
+
+### Generation limits (quality over quantity)
+Target for a typical feature of this size:
+- **Executable:** ~20–25 core regression tests
+- **Recommended:** ~8–15 tests
+- **Requirement gaps:** ~10 questions (not 20+ blocked TCs)
+
+Defer exploratory cases (homoglyph, 100% coupon, zero-width validity) to Recommended or omit unless high risk.
+
+---
+
+Format your response in markdown with exactly these top-level sections:
+
+## Executable Test Cases
+### TC-001: Title
+…
+
+## Requirement Gaps
+| Gap ID | Topic | Question | Candidate test | Linked SC |
+
+## Recommended Tests
+### TC-REC-001: Title (or STC-style if security-only)
+…
+
+## Requirement Coverage
+| SC-xxx | Executable TCs | Confidence | Blocking gaps |
+|--------|----------------|------------|---------------|
+Per scenario: coverage % estimate and confidence (High/Medium/Low).
+
+## Business Rule Coverage
+| Rule ID | Business rule (one line) | Covered by | Duplicates skipped (would-have-been TC titles) |
+|---------|--------------------------|------------|--------------------------------------------------|
+Every BR-xxx in executable suite appears **once** in Covered by. Duplicates skipped must list what was merged and into which TC/matrix row.
+
+### Generation Summary integrity (mutually exclusive dimensions)
+
+For **category**, **test objective**, **priority**, and **primary classification** tables:
+1. Every executable TC ID must appear **exactly once** across all rows in that table (full partition)
+2. No ID may appear in two rows of the same dimension (e.g. TC-006 in both Functional and Negative)
+3. **Count** column must equal the number of unique IDs in that row
+4. Sum of row counts must equal executable **Total**
+5. Recompute before self-check — never mark PASS if any ID is missing, duplicated across rows, or double-counted
+
+*Assertion tags table is non-mutually-exclusive — IDs may repeat across tag rows.*
 
 ## Generation Summary
-- Total test cases generated
-- Test cases per scenario (SC-xxx → TC-ids)
-- Count by category (Functional, Negative, Boundary, Security, Validation, Performance) — Count + TC IDs
-- Count by priority (P0/P1/P2/P3) — Count + TC IDs
-- **Primary classification** — mutually exclusive table (Count + TC IDs; Total = N)
-- **Assertion tags** — separate table labeled *non-mutually-exclusive* (Count + TC IDs per tag)
-- Parameterized or split cases (note TC pairs and rationale)
+- Executable count / Recommended count / Gap count
+- Count by category — Count + unique TC IDs (executable only)
+- Count by test objective — Count + unique TC IDs
+- Count by priority — Count + unique TC IDs
+- **Primary classification** — mutually exclusive per section
+- **Assertion tags** — non-mutually-exclusive, labeled
+- Parameterized/matrix tests (TC-xxx + row count)
 
 ## Self-check Results
-- Scenarios with no linked test case
-- Duplicate or near-duplicate test cases (list pairs and resolution)
-- Invalid category values (must be from allowed list only)
-- Invalid priority format (compound or non-enum values)
-- Primary classification missing or ambiguous (multiple primaries per TC)
-- Assertion tag counts presented as mutually exclusive without labeling
-- Incomplete or blocked steps (TC-xxx list)
-- Contradictory expected results
-- Assumptions presented as requirements
-- Missing boundary-value coverage
+### Summary arithmetic verification
+Recompute every Count from unique IDs. **Do not mark PASS unless Count literally equals len(unique IDs) and sums equal totals.**
 
-Do not produce a full traceability matrix here — dedicated validation steps handle that later.
+| Check | Result |
+|-------|--------|
+| Each summary Count = unique IDs in row | PASS / FAIL |
+| Every TC ID exactly once per dimension (category, objective, priority, primary) | PASS / FAIL |
+| No TC ID in two rows of same dimension | PASS / FAIL |
+| Sum of category counts = executable Total | PASS / FAIL |
+| Sum of priority counts = executable Total | PASS / FAIL |
+| No executable TC with Primary ≠ Requirement-derived | PASS / FAIL |
+| Cross-references point to valid TC IDs | PASS / FAIL |
+| Each BR-xxx mapped to exactly one executable TC | PASS / FAIL |
+| No duplicate business rule across TCs (same rule ≠ multiple IDs) | PASS / FAIL |
+| Duplicate-apply: sequential uses Duplicate submission consistency, not Concurrency | PASS / FAIL |
+| Duplicate-apply: ≤1 TC sequential + ≤1 TC per concurrent mechanism | PASS / FAIL |
+| No "idempotency" label unless requirement defines it | PASS / FAIL |
+| Near-duplicates merged — not merely "justified" | PASS / FAIL |
+| Concurrent cases not categorized as Performance | PASS / FAIL |
+| Undefined rules in Gap section not duplicated as blocked TCs | PASS / FAIL |
+
+### Other checks
+- List any near-duplicate pairs **found and merged** (before/after TC IDs)
+- List any near-duplicate pairs **remaining** — if any remain, deduplication check must be **FAIL**
+- Scenarios with no executable or gap coverage
+- Critical severity inflation (list questionable TC-xxx)
+- Contract vs presentation assertions noted
+
+Do not produce a full traceability matrix here — option 7 handles that.

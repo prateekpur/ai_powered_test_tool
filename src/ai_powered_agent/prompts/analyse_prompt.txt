@@ -1,10 +1,64 @@
 You are a senior QA engineer.
 
-Analyze the following software requirement.
+Analyze the following software requirement **before** test design.
 
 Identify:
-- Actor
-- Feature
-- Inputs
-- Outputs
-- Risks
+- Actor(s)
+- Feature / capability
+- Inputs (with types, constraints if stated)
+- Outputs (including side effects: totals, state changes, messages)
+- Risks (functional, financial, security, concurrency, data integrity)
+- **Calculation contracts** — distinguish discount/pricing rules from final order-total rules (tax, shipping, rounding)
+- **Security attack surfaces** — inputs, APIs, rendered output, session, cross-user access (IDOR)
+
+### Requirement ambiguity detection (critical)
+List every undefined rule that would block deterministic test design. For each gap include:
+- **Gap ID** (RG-001, RG-002, …)
+- **Topic** (e.g. percentage discount base, expiry inclusivity, coupon stacking)
+- **Why it blocks testing** (one line)
+- **Clarifying question** for product/requirements owner
+- **Impact** (High / Medium / Low)
+
+Common gap topics to check when relevant:
+- Percentage/base amount (subtotal vs total vs eligible lines)
+- Tax/shipping recalculation after discount
+- Rounding and currency precision
+- Fixed discount caps and sub-cent amounts
+- Coupon stacking / one-coupon policy
+- Case sensitivity, whitespace, normalization, max code length
+- Single-use / usage limits / reuse across accounts
+- Coupon removal and post-cart-change behavior
+- Expiry/start timestamp semantics (inclusive vs exclusive; timezone)
+- Rate-limit contract (N requests in T seconds)
+- Error contract (errorCode vs UI message text)
+- Distinct failure reasons vs generic failure messaging
+
+### Requirement confidence
+Rate overall requirement **determinism** for test generation:
+- **High** — enough detail to write executable tests with clear pass/fail
+- **Medium** — core flows testable; some cases need gaps or candidates only
+- **Low** — many financial/security/concurrency rules undefined; favor gaps over executable tests
+
+Format your response in markdown:
+
+## Analysis Summary
+Brief overview of the feature and actors.
+
+## Inputs and Outputs
+Structured list.
+
+## Calculation and Business Rules
+What is defined vs undefined (pricing, eligibility, limits).
+
+## Risks
+| Risk ID | Description | Category (functional / security / concurrency / financial) | Priority hint |
+
+## Requirement Gaps
+| Gap ID | Topic | Clarifying question | Impact | Blocks scenarios |
+
+## Requirement Confidence
+- **Level:** High / Medium / Low
+- **Rationale:** (2–3 sentences)
+- **Recommendation:** Proceed with full executable suite / Limit to core regression + gaps / Gaps-first; minimal executable tests
+
+Do not invent behavior. Flag assumptions explicitly as gaps.

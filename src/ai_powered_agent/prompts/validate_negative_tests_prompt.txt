@@ -10,6 +10,7 @@ Validate the Negative Tests artifact below — both individual test cases **and*
 | Priority | Present; exactly one of P0, P1, P2, P3 |
 | Severity | Present |
 | Test Steps | Numbered, complete or explicitly Blocked |
+| Test objective | Present when included; sequential duplicate → Duplicate submission consistency, not Concurrency |
 | Primary classification | Present; exactly one of Requirement-derived / Needs clarification / Recommendation |
 | Assertion tags | Present; must include the primary classification; may list additional tags |
 
@@ -19,10 +20,12 @@ Validate the Negative Tests artifact below — both individual test cases **and*
 ### Generation Summary integrity (critical)
 Recompute counts from the test-case body — do not trust stated counts without verification.
 
-**Mutually exclusive partitions** (each NTC in exactly one row; sums must equal Total):
+**Mutually exclusive partitions** (each NTC in exactly one row per dimension; sums must equal Total):
 - Category
 - Priority
 - Primary classification
+
+**Partition rule:** Every NTC ID must appear **exactly once** in each mutually exclusive summary dimension. **FAIL** if any ID is in two category rows, counted twice in one row, or missing from the partition.
 
 For each mutually exclusive summary row:
 1. Extract the listed NTC IDs

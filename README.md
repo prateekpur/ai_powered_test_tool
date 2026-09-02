@@ -46,10 +46,10 @@ ai-agent
 |---|--------|-------------|
 | 1 | Analyze Requirement | Capture requirement details and run analysis |
 | 2 | Generate Test Scenarios | High-level scenarios from requirement + analysis |
-| 3 | Generate Test Cases | Detailed test cases from scenarios, plus boundary value tests (BTC-xxx) |
+| 3 | Generate Test Cases | Executable TCs, requirement gaps, and recommended tests; boundary tests (BTC-xxx) appended |
 | 4 | Validate Test Schema | Validate test case structure and fields |
 | 5 | Generate Negative Tests | Invalid-input, boundary, and error-handling test cases |
-| 6 | Generate Security Tests | Injection, XSS, auth, and other security test cases (STC-xxx) |
+| 6 | Generate Security Tests | Core security suite (~7–8 STC-xxx); conditional tests deferred until architecture confirmed |
 | 7 | Coverage/Traceability Validator | Audit coverage and traceability |
 | 8 | Remediate Coverage Gaps | Append new scenarios/tests to close gaps from option 7 |
 | 9 | Export Report | Export all session artifacts to `./reports/` |

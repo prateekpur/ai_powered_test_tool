@@ -23,11 +23,21 @@ Focus on:
 Do **not** use: `Invalid input`, `State error`, `Authorization`, `Error handling`, `Other`, or meta-labels like `Core requirement tests`.
 
 ### Classification rules
-- Boundary/limit tests → **Boundary** (not generic Negative)
-- Invalid state / out-of-order → **Negative** or **Validation**
-- Auth/unauthorized → **Security**
-- Failure handling / degraded UX → **Negative** or **Validation**
+- Boundary/limit tests with **defined** limits → defer to BTC suite if already generated; skip duplicate
+- Invalid state / out-of-order → **Negative** or **Validation**; Objective: **State management**
+- **Concurrent** duplicate (double-click, multi-tab, parallel requests) → Category **Functional**, Objective **Concurrency**
+- **Sequential** duplicate submit (apply twice in order, same session) → Objective **Duplicate submission consistency** — **NOT** Concurrency
+- Auth/unauthorized → **Security**; Objective **Authorization**
 - If already covered in Existing Test Cases, skip or add a genuinely new angle only
+
+### Test objective (exactly one per NTC)
+Calculation | Eligibility | State management | Concurrency | Duplicate submission consistency | Authorization | Data integrity | Abuse prevention | Input validation | Error handling | other
+
+Do **not** use "idempotency" unless the requirement explicitly defines it.
+
+### Requirement gaps vs blocked tests
+- If outcome depends on undefined rule → add to **Requirement Gaps** section (one candidate NTC max), not multiple blocked NTCs
+- Executable NTCs only when pass/fail is deterministic from requirement
 
 ### Requirement grounding and classification
 - **Primary classification** (one per test — drives summary counts):
@@ -39,9 +49,11 @@ Do **not** use: `Invalid input`, `State error`, `Authorization`, `Error handling
 
 Do not use a combined field like `Assertion type: A; B; C` without also stating **Primary classification** separately.
 
-### Duplication
-- No duplicate lockout coverage (trigger vs post-lockout only if distinct, requirement-grounded behavior)
-- No near-duplicates with Existing Test Cases or within NTC set (merge or cross-reference)
+### Duplication (strict)
+- **One NTC per business rule** — same rules as executable TC generation (BR-xxx)
+- If Existing Test Cases already cover BR-xxx (including matrix rows), **skip** — list in Skipped table
+- Near-duplicates within NTC set: merge into matrix; do not "justify" as separate NTCs
+- Idempotency/duplicate-apply: at most one NTC per mechanism; sequential → Duplicate submission consistency
 - Cross-entity tests: state objective pass/fail criteria in Expected Results
 
 ### Priority and severity
@@ -53,11 +65,13 @@ For each negative test case provide:
 - Test ID (NTC-001, NTC-002, ...)
 - Linked Scenario ID (SC-xxx) if applicable, or "N/A"
 - Title
+- Business rule ID (BR-xxx)
 - Category (Functional / Negative / Boundary / Security / Validation / Performance)
+- Test objective (see list above)
 - Preconditions
 - Test Steps (numbered, complete or explicitly Blocked: Needs clarification)
 - Test Data
-- Expected Results
+- Expected Results — prefer **errorCode** / status over exact UI copy unless requirement specifies message text
 - Primary classification — **exactly one** of: Requirement-derived / Needs clarification / Recommendation
 - Assertion tags — zero or more of the same values (comma-separated); must include the primary classification
 - Priority (P0/P1/P2/P3)
@@ -99,6 +113,12 @@ Format your response in markdown:
 ## Negative Test Cases
 One subsection per test case (### NTC-001: Title) including all fields above.
 
+## Skipped — already covered by Existing Test Cases
+| Would-be NTC topic | Existing TC/NTC | BR-xxx | Reason skipped |
+
+## Requirement Gaps
+| Gap ID | Topic | Question | Candidate NTC | Why not executable |
+
 ## Generation Summary
 - **Total negative test cases generated:** N (must equal highest NTC number and count of ### NTC-xxx sections)
 - Count by category — table with Count + unique NTC IDs (allowed enum only)
@@ -125,6 +145,10 @@ One subsection per test case (### NTC-001: Title) including all fields above.
 | Each NTC in exactly one category | PASS / FAIL |
 | No invalid category labels | PASS / FAIL |
 | No contradictory or self-correcting count text | PASS / FAIL |
+| Each BR-xxx appears at most once in NTC suite | PASS / FAIL |
+| No NTC duplicates TC business rule | PASS / FAIL |
+| Sequential duplicate not labeled Concurrency | PASS / FAIL |
+| Every NTC ID exactly once per summary dimension | PASS / FAIL |
 
 All checks must be **PASS** before finalizing. If any FAIL, fix the summary — do not output wrong counts with corrections.
 
